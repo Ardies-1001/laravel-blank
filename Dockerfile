@@ -19,5 +19,5 @@ ENV LOG_CHANNEL stderr
 ENV COMPOSER_ALLOW_SUPERUSER 1
 
 # CMD ["/start.sh"]
-CMD ["php-fpm"]
+CMD service nginx start && php-fpm
 

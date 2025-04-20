@@ -1,23 +1,39 @@
-# FROM richarvey/nginx-php-fpm:1.7.2
 FROM php:8.2-fpm
 
-COPY . .
+# Installer dépendances système
+RUN apt-get update && apt-get install -y \
+    nginx \
+    git \
+    curl \
+    zip \
+    unzip \
+    supervisor \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    libzip-dev \
+    libcurl4-openssl-dev \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
-# Image config
-ENV SKIP_COMPOSER 1
-ENV WEBROOT /var/www/html/public
-ENV PHP_ERRORS_STDERR 1
-ENV RUN_SCRIPTS 1
-ENV REAL_IP_HEADER 1
+# Installer Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Laravel config
-ENV APP_ENV production
-ENV APP_DEBUG false
-ENV LOG_CHANNEL stderr
+# Copier les fichiers de l'app
+COPY . /var/www/html
 
-# Allow composer to run as root
-ENV COMPOSER_ALLOW_SUPERUSER 1
+# Définir le répertoire de travail
+WORKDIR /var/www/html
 
-# CMD ["/start.sh"]
-CMD service nginx start && php-fpm
+# Config Nginx
+COPY docker/nginx.conf /etc/nginx/nginx.conf
 
+# Config Supervisor pour gérer Nginx + PHP-FPM
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Droits
+RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
+
+# Exposer le port
+EXPOSE 80
+
+CMD ["/usr/bin/supervisord"]

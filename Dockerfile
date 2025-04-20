@@ -24,11 +24,8 @@ COPY . /var/www/html
 # Définir le répertoire de travail
 WORKDIR /var/www/html
 
-# Config Nginx
-COPY docker/nginx.conf /etc/nginx/nginx.conf
-
-# Config Supervisor pour gérer Nginx + PHP-FPM
-COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY conf/nginx/nginx-site.conf /etc/nginx/sites-available/default
+COPY conf/nginx/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Droits
 RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html

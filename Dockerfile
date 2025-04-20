@@ -38,4 +38,5 @@ COPY conf/nginx/supervisord.conf   /etc/supervisor/conf.d/supervisord.conf
 RUN chown -R www-data:www-data /var/www/html
 
 EXPOSE 80
-CMD ["/start.sh"]
+CMD ["sh", "-c", "nginx && php-fpm"]
+
